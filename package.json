@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Backend API for Cocos Challenge",
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "@prisma/client": "^6.4.1",

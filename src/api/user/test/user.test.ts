@@ -1,5 +1,4 @@
 import {
-  getFakeCurrentUserAuthorization,
   getFakeUser,
 } from "../../../testing/fakes";
 import { mockCount } from "../../../testing/mock-pagination";
@@ -68,7 +67,6 @@ describe("User Test", () => {
 
   describe("Delete User", () => {
     test("deleteCharacter deletes and returns deleted Character", async () => {
-      const currentUser = getFakeCurrentUserAuthorization();
       const now = new Date();
       const fakeUser = getFakeUser({
         id: "cl1v51jp9000eqofg5bnu90gd",
@@ -78,7 +76,7 @@ describe("User Test", () => {
         ...fakeUser,
         deletedAt: now,
       });
-      const result = await deleteUser({ id: fakeUser.id }, currentUser);
+      const result = await deleteUser({ id: fakeUser.id });
 
       expect(prismaMock.user.update).toHaveBeenCalledTimes(1);
       expect(result).not.toBeFalsy();

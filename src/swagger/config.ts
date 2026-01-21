@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { config } from "../config";
-import { securitySchema } from "./security.swagger";
-import { authPaths } from "./auth/auth.swagger";
 import { userPaths } from "./user/user.swagger";
 
 export const swaggerDocument = {
   openapi: "3.0.1",
   info: {
     version: "1.0.0",
-    title: "APIs Document",
-    description: "Pathfinder Character API",
+    title: "Cocos Challenge API",
+    description: "Backend API for Cocos Challenge",
     termsOfService: "",
   },
   servers: [
@@ -18,12 +16,7 @@ export const swaggerDocument = {
       description: "Local server",
     },
   ],
-  components: {
-    securitySchemes: securitySchema,
-  },
-  security: [{ cookieAuth: [] }],
   paths: {
-    ...authPaths,
     ...userPaths,
   },
 };

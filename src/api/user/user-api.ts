@@ -30,7 +30,7 @@ import {
 } from "./user-api.types";
 import { getPaginationOptions } from "../../utils/pagination";
 import { createDeleteResponse } from "../../utils/http-response-factory";
-import { getCurrentUserAuthorization } from "../../middleware/security/authorization";
+
 
 export const handleSearchUser = async (
   req: Request,
@@ -88,8 +88,7 @@ export const handleDeleteUser = async (
     userRequestParamsSchema,
     req.params
   );
-  const currentUser = getCurrentUserAuthorization(req);
-  const result = await deleteUser({ id: userId }, currentUser);
+  const result = await deleteUser({ id: userId });
 
   return createDeleteResponse<User>(res, result);
 };

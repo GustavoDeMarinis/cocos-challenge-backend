@@ -1,5 +1,5 @@
 {
-  "name": "pathfinder-character-api",
+  "name": "cocos-challenge-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -15,14 +15,13 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Backend API for Cocos Challenge",
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
     "@prisma/client": "^6.4.1",
     "@swc/jest": "^0.2.36",
     "ajv": "^8.16.0",
     "ajv-formats": "^3.0.1",
-    "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "cuid": "^3.0.0",
@@ -33,7 +32,6 @@
     "helmet": "^8.1.0",
     "http-status-codes": "^2.3.0",
     "json-schema-to-ts": "^3.1.0",
-    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0",
     "mongoose": "^8.4.4",
     "nodemon": "^3.1.4",
@@ -42,12 +40,10 @@
     "winston": "^3.13.0"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.14.9",
     "@types/swagger-ui-express": "^4.1.6",
     "concurrently": "^8.2.2",

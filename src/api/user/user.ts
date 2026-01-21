@@ -9,7 +9,6 @@ import {
 import { handleSort } from "../../utils/sorting";
 import { getQueryCount } from "../../utils/pagination";
 import { logDebug } from "../../utils/logging";
-import { CurrentUserAuthorization } from "../../middleware/security/authorization";
 const subService = "user/service";
 
 export const userSelect = {
@@ -125,17 +124,8 @@ export const updateUser = async (
 };
 
 export const deleteUser = async (
-  { id }: Required<Pick<Prisma.UserWhereUniqueInput, "id">>,
-  currentUser: CurrentUserAuthorization
+  { id }: Required<Pick<Prisma.UserWhereUniqueInput, "id">>
 ) => {
-  if (currentUser.role !== UserRole.Admin) {
-    if (id !== currentUser.userId) {
-      return {
-        code: ErrorCode.Forbidden,
-        message: "Forbidden",
-      };
-    }
-  }
   const existingUser = await prisma.user.findUnique({
     select: {
       deletedAt: true,

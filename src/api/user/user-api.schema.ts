@@ -140,7 +140,7 @@ export const userRequestParamsSchema = {
   properties: {
     userId: {
       type: "string",
-      description: "character Id",
+      description: "User Id",
       checkIdIsCuid: true,
     },
   },

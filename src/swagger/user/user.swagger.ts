@@ -6,7 +6,6 @@ import {
   userSearchResponseSchema,
 } from "../../api/user/user-api.schema";
 import { commonErrorsResponseSchema } from "../error.swagger";
-import { securitySchema } from "../security.swagger";
 
 const searchUser = {
   tags: ["User"],
@@ -14,7 +13,6 @@ const searchUser = {
     "## Search User\n" +
     "**Postman:** [GET Search User](https://web.postman.co/workspace/My-Workspace~cb7fd58f-a222-423d-805a-4c564f9d828a/request/16791664-6cf417f2-4090-45c0-a3a1-084965653ea3)",
   operationId: "searchUser",
-  security: [securitySchema],
   parameters: [
     {
       in: "query",
@@ -78,7 +76,7 @@ export const getUser = {
     "## Get a User\n" +
     "**Postman:** [GET Get a User record](https://web.postman.co/workspace/My-Workspace~cb7fd58f-a222-423d-805a-4c564f9d828a/request/16791664-7a2585c4-a30d-401e-a77e-b76ee8e6ee0f)",
   operationId: "getUser",
-  security: [securitySchema],
+
   responses: {
     "200": {
       description: "Successful User retrieval",
@@ -98,7 +96,7 @@ const updateUser = {
     "## Update a User record\n" +
     "**Postman:** [PATCH Update a User record](https://web.postman.co/workspace/My-Workspace~cb7fd58f-a222-423d-805a-4c564f9d828a/request/16791664-22d3ead8-06ca-4be1-80bf-d588ea9c53cf)",
   operationId: "updateUser",
-  security: [securitySchema],
+
   requestBody: {
     content: {
       "application/json": {
@@ -120,7 +118,7 @@ export const deleteUser = {
     "## Delete a User record\n" +
     "**Postman:** [DELETE Delete a User record](https://web.postman.co/workspace/My-Workspace~cb7fd58f-a222-423d-805a-4c564f9d828a/request/16791664-0b991b64-4bca-4619-adfd-3f2d1e037e9e)",
   operationId: "deleteUser",
-  security: [securitySchema],
+
   responses: {
     "204": {
       description: "Successful User delete",

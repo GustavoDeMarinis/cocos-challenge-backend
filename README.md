@@ -1,71 +1,65 @@
-# Pathfinder 2e Character Editor
+# Cocos Challenge Backend
 
-## 📜 Project Overview
-Pathfinder 2e Character Editor is a backend API designed to help players manage their Pathfinder character sheets, inventory, and bonuses with ease. Many existing apps struggle to handle character stats, bonuses, and inventories properly, making character maintenance confusing. This tool simplifies character tracking, ensuring players don’t forget important modifiers or bonuses during gameplay.
+Backend API for the Cocos Challenge, developed using Node.js and Express.
 
-## 🎯 Target Audience
-This project is for **Pathfinder 2e players** who want a **virtual tool** to assist with character management in their campaigns.
+## Description
 
-## ✨ Features
-- Create and manage Pathfinder 2e characters.
-- Track inventory, character sheets, and bonuses.
-- Create homebrew assets with structured yet flexible rules.
-- REST API to interact with characters, classes, weapons, armor, and more.
+This API allows users to:
+- View their portfolio (total value, available cash, asset list with performance).
+- Search for assets (by ticker or name).
+- Place market and limit orders (Buy/Sell).
 
-## 🛠️ Technologies Used
-- **Backend:** Node.js v20, Express.js
-- **Database:** PostgreSQL, Prisma ORM
-- **Language:** TypeScript
+## Tech Stack
 
-## 🚀 Installation & Setup
-To run the project locally:
+- **Runtime**: Node.js
+- **Framework**: Express
+- **Database**: PostgreSQL (via Prisma ORM)
+- **Language**: TypeScript
 
-```sh
-git clone <repo-url>
-cd pathfinder-2e-character-editor
-ask gustadema@gmail.com for .env file or generate your own credentials.
-npm install
-docker-compose up
-npx prisma generate
-npx prisma migrate reset
-npm start
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- PostgreSQL
+- Docker (optional, for running DB)
+
+### Installation
+
+1.  Clone the repository.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Set up environment variables:
+    Cp `.env.example` to `.env` (create one if it doesn't exist) and configure your `DATABASE_URL`.
+
+### Database Setup
+
+1.  Run migrations:
+    ```bash
+    npx prisma migrate dev
+    ```
+2.  Seed the database (if applicable):
+    ```bash
+    npx prisma db seed
+    ```
+
+### Running the Application
+
+- Development mode:
+  ```bash
+  npm run start
+  ```
+- Build and run:
+  ```bash
+  npm run build
+  node dist/index.js
+  ```
+
+### Testing
+
+Run unit/integration tests:
+```bash
+npm test
 ```
-
-## 🔗 API Endpoints
-**Base URL:** `http://localhost:5000`
-
-### Authentication
-- `POST /auth/signUp` → Create a user account
-- `POST /auth/signIn` → Login to receive an authentication token
-- `PATCH /auth/password/{userId}` → Change a user's password
-
-### Armor Base
-- `GET /armor-base/` → Get all armor bases
-- `GET /armor-base/{armorBaseId}` → Get a specific armor base
-- `POST /armor-base/` → Create a new armor base
-- `PATCH /armor-base/{armorBaseId}` → Update an armor base
-- `DELETE /armor-base/{armorBaseId}` → Delete an armor base
-
-Similar CRUD patterns exist for:
-- **Weapon Base**
-- **Ancestry**
-- **Character**
-- **Character Class**
-- **Language**
-
-### User API
-- `PATCH /users/{userId}` → Update user information (excluding password)
-
-## 🛠️ How to Use
-- Connect a frontend application or use API tools like **Postman** or **Swagger**.
-- Swagger documentation is available at:
-  ```
-  http://localhost:{port}/api-docs/
-  ```
-
-## 📝 Contribution
-Currently, contributions are **not open** to the public.
-
-## 🛠️ Reporting Issues
-If you encounter any issues or have suggestions, please open an issue on **GitHub Issues**.
-

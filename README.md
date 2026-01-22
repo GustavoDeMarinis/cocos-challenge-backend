@@ -36,13 +36,16 @@ This API allows users to:
 
 ### Database Setup
 
-1.  Run migrations:
-    ```bash
-    npx prisma migrate dev
+1.  Initialize Prisma:
+    ```npx prisma init
     ```
-2.  Seed the database (if applicable):
+2.  Run Prisma Db Pull:
     ```bash
-    npx prisma db seed
+    npx prisma db pull
+    ```
+3.  Generate Types:
+    ```bash
+    npx prisma generate
     ```
 
 ### Running the Application

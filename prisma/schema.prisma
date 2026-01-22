@@ -8,15 +8,20 @@ datasource db {
 }
 
 model Instrument {
-  id         Int          @id @default(autoincrement())
-  ticker     String       @unique(map: "instruments_ticker_unique") @db.VarChar(10)
-  name       String       @db.VarChar(255)
-  type       String       @db.VarChar(10)
+  id         Int            @id @default(autoincrement())
+  ticker     String         @unique(map: "instruments_ticker_unique") @db.VarChar(10)
+  name       String         @db.VarChar(255)
+  type       InstrumentType
   marketdata MarketData[]
   orders     Order[]
   positions  Position[]
 
   @@map("instruments")
+}
+
+enum InstrumentType {
+  ACCIONES
+  MONEDAS
 }
 
 model MarketData {
@@ -34,19 +39,38 @@ model MarketData {
 }
 
 model Order {
-  id           Int        @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   instrumentid Int
   userid       Int
   size         Int
-  price        Decimal    @db.Decimal(10, 2)
-  type         String     @db.VarChar(10)
-  side         String     @db.VarChar(10)
-  status       String     @db.VarChar(20)
-  datetime     DateTime   @db.Timestamp(6)
-  instruments  Instrument @relation(fields: [instrumentid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users        User       @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  price        Decimal     @db.Decimal(10, 2)
+  type         OrderType
+  side         OrderSide
+  status       OrderStatus
+  datetime     DateTime    @db.Timestamp(6)
+  instruments  Instrument  @relation(fields: [instrumentid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        User        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("orders")
+}
+
+enum OrderType {
+  LIMIT
+  MARKET
+}
+
+enum OrderSide {
+  BUY
+  SELL
+  CASH_IN
+  CASH_OUT
+}
+
+enum OrderStatus {
+  NEW
+  FILLED
+  REJECTED
+  CANCELLED
 }
 
 model Position {

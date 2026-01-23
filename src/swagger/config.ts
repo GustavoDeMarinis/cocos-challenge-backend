@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { config } from "../config";
-import { userPaths } from "./user/user.swagger";
+import { portfolioPaths } from "./portfolio/portfolio.swagger";
 
 export const swaggerDocument = {
   openapi: "3.0.1",
@@ -17,7 +17,7 @@ export const swaggerDocument = {
     },
   ],
   paths: {
-    ...userPaths,
+    ...portfolioPaths,
   },
 };
 

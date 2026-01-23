@@ -1,4 +1,4 @@
-import Router from "express-promise-router";
+/* import Router from "express-promise-router";
 import {
   handleDeleteUser,
   handleGetUser,
@@ -30,3 +30,4 @@ router.delete(
 );
 
 export { router };
+ */

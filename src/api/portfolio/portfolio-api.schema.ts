@@ -62,12 +62,12 @@ export const portfolioGetResponseSchema = {
             type: "number",
             description: "Total Account Value",
         },
-        availableFunds: {
+        available_cash: {
             type: "number",
             description: "Available Funds",
         },
         positions: portfolioPositionSchema,
     },
     additionalProperties: false,
-    required: ["totalAccountValue", "availableFunds", "positions"],
+    required: ["totalAccountValue", "available_cash", "positions"],
 } as const;

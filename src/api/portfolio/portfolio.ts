@@ -74,7 +74,7 @@ export const getPortfolio = async ({
     return mapPortfolioResponse(user);
 };
 
-type PortfolioUser = Prisma.UserGetPayload<{
+export type PortfolioUser = Prisma.UserGetPayload<{
     select: typeof portfolioUserSelect;
 }>;
 

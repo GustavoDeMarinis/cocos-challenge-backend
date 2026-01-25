@@ -5,7 +5,7 @@ Backend API for the Cocos Challenge, developed using Node.js and Express.
 ## Description
 
 This API allows users to:
-- View their portfolio (total value, available cash, asset list with performance).
+- View their [Portfolio](docs/Portfolio.md) (total value, available cash, asset list with performance).
 - Search for assets (by ticker or name).
 - Place market and limit orders (Buy/Sell).
 

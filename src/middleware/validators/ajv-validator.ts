@@ -22,12 +22,12 @@ export const validateJSONSchemaObject = <ObjectType>(
   }
 };
 
-const checkIdIsCuid = (_schema: unknown, data: string) => {
-  return cuid.isCuid(data);
+const checkIdIsNumber = (_schema: unknown, data: number) => {
+  return Number.isInteger(data);
 };
 
 ajv.addKeyword({
-  keyword: "checkIdIsCuid",
-  type: "string",
-  validate: checkIdIsCuid,
+  keyword: "checkIdIsNumber",
+  type: "number",
+  validate: checkIdIsNumber,
 });

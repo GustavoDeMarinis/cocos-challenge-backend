@@ -1,5 +1,4 @@
 import { getPortfolio, mapPortfolioResponse } from "../portfolio";
-import prisma from "../../../integrations/prisma/prisma-client";
 import { getFakePortfolioUser, getFakeUser, getFakeInstrument, getFakeMarketData, getFakePosition } from "../../../testing/fakes";
 import { ErrorCode } from "../../../utils/shared-types";
 import { Prisma } from "@prisma/client";

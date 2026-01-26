@@ -6,7 +6,7 @@ export interface SearchResult<T> {
   count: number;
 }
 export interface ResultWithId {
-  id: string;
+  id: number;
 }
 
 export type GetArrayResponseOptions = {
@@ -19,7 +19,7 @@ export type PaginationOptions = {
 };
 
 export interface ResultWithOptionalId {
-  id?: string;
+  id?: number;
   [key: string]: unknown;
 }
 

@@ -1,9 +1,10 @@
 import Router from "express-promise-router";
+import { handleSearchInstrument } from "./instrument-api";
 const router = Router();
 
 router.get(
     "/",
-    handleSearchAsset
+    handleSearchInstrument
 );
 
 export { router };

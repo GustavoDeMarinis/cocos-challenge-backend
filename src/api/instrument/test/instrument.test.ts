@@ -1,6 +1,7 @@
 import { searchInstrument } from "../instrument";
 import { prismaMock } from "../../../testing/mock-prisma";
 import { getFakeInstrumentResult } from "../../../testing/fakes";
+import { InstrumentType } from "../instrument-api.types";
 
 describe("Instrument Service", () => {
     beforeEach(() => {
@@ -14,13 +15,13 @@ describe("Instrument Service", () => {
                     id: 1,
                     name: "Apple Inc",
                     ticker: "AAPL",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
                 getFakeInstrumentResult({
                     id: 2,
                     name: "Apple Hospitality",
                     ticker: "APLE",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
             ];
 
@@ -62,7 +63,7 @@ describe("Instrument Service", () => {
                     id: 1,
                     name: "Apple Inc",
                     ticker: "AAPL",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
             ];
 
@@ -104,7 +105,7 @@ describe("Instrument Service", () => {
                     id: 1,
                     name: "Tesla Inc",
                     ticker: "TSLA",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
             ];
 
@@ -152,13 +153,13 @@ describe("Instrument Service", () => {
                     id: 1,
                     name: "Apple Inc",
                     ticker: "AAPL",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
                 getFakeInstrumentResult({
                     id: 2,
                     name: "Tesla Inc",
                     ticker: "TSLA",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
             ];
 
@@ -237,7 +238,7 @@ describe("Instrument Service", () => {
                     id: 1,
                     name: "Stock",
                     ticker: "STK",
-                    type: "ACCIONES",
+                    type: InstrumentType.ACCIONES,
                 }),
             ];
 
@@ -264,7 +265,7 @@ describe("Instrument Service", () => {
                 id: 1,
                 name: "Apple Inc",
                 ticker: "AAPL",
-                type: "ACCIONES",
+                type: InstrumentType.ACCIONES,
             }),
         ];
 

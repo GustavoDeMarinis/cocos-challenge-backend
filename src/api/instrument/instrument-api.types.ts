@@ -5,3 +5,5 @@ import { instrumentSearchRequestQueryParamsSchema, instrumentSearchResponseSchem
 export type InstrumentSearchRequestQueryParams = FromSchema<typeof instrumentSearchRequestQueryParamsSchema>;
 
 export type InstrumentSearchResponse = FromSchema<typeof instrumentSearchResponseSchema, CommonDeserializationOptions>;
+
+export enum InstrumentType { ACCIONES = "ACCIONES", MONEDA = "MONEDA" }

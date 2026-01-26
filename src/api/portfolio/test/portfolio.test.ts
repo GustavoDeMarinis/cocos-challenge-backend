@@ -3,6 +3,7 @@ import { getFakePortfolioUser, getFakeUser, getFakeInstrument, getFakeMarketData
 import { ErrorCode } from "../../../utils/shared-types";
 import { Prisma } from "@prisma/client";
 import { prismaMock } from "../../../testing/mock-prisma";
+import { InstrumentType } from "../../instrument/instrument-api.types";
 describe("Portfolio Service", () => {
 
     beforeEach(() => {
@@ -55,7 +56,7 @@ describe("Portfolio Service", () => {
                             id: 1,
                             ticker: "AAPL",
                             name: "Apple",
-                            type: "ACCIONES",
+                            type: InstrumentType.ACCIONES,
                             marketdata: [
                                 {
                                     close: new Prisma.Decimal(110), // Current price
@@ -101,7 +102,7 @@ describe("Portfolio Service", () => {
                             id: 1,
                             ticker: "TSLA",
                             name: "Tesla",
-                            type: "ACCIONES",
+                            type: InstrumentType.ACCIONES,
                             marketdata: [
                                 {
                                     close: new Prisma.Decimal(90),

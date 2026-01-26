@@ -11,18 +11,18 @@ const instrumentSelect = {
     ticker: true,
     type: true,
     marketdata: {
-    take: 1,    
-    orderBy: { date: Prisma.SortOrder.desc },
-    select: {
-        close: true,
-        previousclose: true,
-        date: true,
+        take: 1,
+        orderBy: { date: Prisma.SortOrder.desc },
+        select: {
+            close: true,
+            previousclose: true,
+            date: true,
+        },
     },
-},
 }
 
 export const instrumentArgs = Prisma.validator<Prisma.InstrumentDefaultArgs>()({
-  select: instrumentSelect,
+    select: instrumentSelect,
 });
 
 export type InstrumentResult = Prisma.InstrumentGetPayload<typeof instrumentArgs>;
@@ -30,8 +30,8 @@ export type InstrumentResult = Prisma.InstrumentGetPayload<typeof instrumentArgs
 export const searchInstrument = async (search: {
     name?: string;
     ticker?: string;
-}, 
-{ skip, take }: PaginationOptions): Promise<SearchResult<InstrumentResult> | ErrorResult> => {
+},
+    { skip, take }: PaginationOptions): Promise<SearchResult<InstrumentResult> | ErrorResult> => {
     const or: Prisma.InstrumentWhereInput[] = [];
     if (search.name) {
         or.push({
@@ -50,10 +50,10 @@ export const searchInstrument = async (search: {
         });
     }
     const where: Prisma.InstrumentWhereInput = {
-    type: {
-        not: "MONEDA",
-    },
-    ...(or.length > 0 ? { OR: or } : {}),
+        type: {
+            not: "MONEDA",
+        },
+        ...(or.length > 0 ? { OR: or } : {}),
     };
     const items = await prisma.instrument.findMany({
         select: instrumentSelect,
@@ -61,20 +61,20 @@ export const searchInstrument = async (search: {
         skip,
         take,
     });
-   const count = await getQueryCount(prisma.instrument, where);
+    const count = await getQueryCount(prisma.instrument, where);
 
-   logDebug({
-    subService,
-    message: `Character Search found (${count}) results`,
-    details: {
-      count: count,
-      filter: where,
-    },
+    logDebug({
+        subService,
+        message: `Character Search found (${count}) results`,
+        details: {
+            count: count,
+            filter: where,
+        },
 
-  });
- 
+    });
+
     return {
-       items,
-       count,
+        items,
+        count,
     };
 }

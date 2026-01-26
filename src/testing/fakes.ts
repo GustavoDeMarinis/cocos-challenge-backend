@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Prisma, User, Instrument, MarketData } from "@prisma/client";
 import { PortfolioUser } from "../api/portfolio/portfolio";
+import { InstrumentResult } from "../api/instrument/instrument";
 
 export const getFakeUser = (partialUser: Partial<User> = {}): User => {
   return {
@@ -50,7 +51,7 @@ export const getFakeInstrument = (
     id: partial.id || faker.number.int(),
     ticker: partial.ticker || faker.finance.currencyCode(),
     name: partial.name || faker.commerce.productName(),
-    type: partial.type || ("ACCIONES" as any),
+    type: partial.type || "ACCIONES",
   };
 };
 
@@ -75,6 +76,24 @@ export const getFakePosition = (
       ...getFakeInstrument(),
       marketdata: [getFakeMarketData()],
       ...partial.instruments,
-    } as any, // Cast because we are mixing types (Full Instrument vs Selected Subset), but it satisfies the requirement
+    }
+  };
+};
+
+export const getFakeInstrumentResult = (
+  partial: Partial<InstrumentResult> = {}
+): InstrumentResult => {
+  return {
+    id: partial.id || faker.number.int(),
+    ticker: partial.ticker || faker.finance.currencyCode(),
+    name: partial.name || faker.commerce.productName(),
+    type: partial.type || "ACCIONES",
+    marketdata: partial.marketdata || [
+      {
+        close: new Prisma.Decimal(faker.finance.amount()),
+        previousclose: new Prisma.Decimal(faker.finance.amount()),
+        date: faker.date.recent(),
+      },
+    ],
   };
 };

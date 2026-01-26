@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Instrument {
-  id         Int            @id @default(autoincrement())
-  ticker     String         @unique(map: "instruments_ticker_unique") @db.VarChar(10)
-  name       String         @db.VarChar(255)
-  type       InstrumentType
+  id         Int          @id @default(autoincrement())
+  ticker     String       @unique(map: "instruments_ticker_unique") @db.VarChar(10)
+  name       String       @db.VarChar(255)
+  type       String       @db.VarChar(10)
   marketdata MarketData[]
   orders     Order[]
   positions  Position[]
@@ -19,20 +19,15 @@ model Instrument {
   @@map("instruments")
 }
 
-enum InstrumentType {
-  ACCIONES
-  MONEDA
-}
-
 model MarketData {
-  id            Int         @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   instrumentid  Int?
-  high          Decimal?    @db.Decimal(10, 2)
-  low           Decimal?    @db.Decimal(10, 2)
-  open          Decimal?    @db.Decimal(10, 2)
-  close         Decimal?    @db.Decimal(10, 2)
-  previousclose Decimal?    @db.Decimal(10, 2)
-  date          DateTime    @db.Date
+  high          Decimal?     @db.Decimal(10, 2)
+  low           Decimal?     @db.Decimal(10, 2)
+  open          Decimal?     @db.Decimal(10, 2)
+  close         Decimal?     @db.Decimal(10, 2)
+  previousclose Decimal?     @db.Decimal(10, 2)
+  date          DateTime     @db.Date
   instruments   Instrument? @relation(fields: [instrumentid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("marketdata")
@@ -44,56 +39,38 @@ model Order {
   userid       Int
   size         Int
   price        Decimal     @db.Decimal(10, 2)
-  type         OrderType
-  side         OrderSide
-  status       OrderStatus
+  type         String      @db.VarChar(10)
+  side         String      @db.VarChar(10)
+  status       String      @db.VarChar(20)
   datetime     DateTime    @db.Timestamp(6)
-  instruments  Instrument  @relation(fields: [instrumentid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users        User        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  instruments  Instrument @relation(fields: [instrumentid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        User       @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("orders")
 }
 
-enum OrderType {
-  LIMIT
-  MARKET
-}
-
-enum OrderSide {
-  BUY
-  SELL
-  CASH_IN
-  CASH_OUT
-}
-
-enum OrderStatus {
-  NEW
-  FILLED
-  REJECTED
-  CANCELLED
-}
-
 model Position {
-  id             Int        @id @default(autoincrement())
+  id             Int         @id @default(autoincrement())
   user_id        Int
   instrument_id  Int
   size           Int
-  average_price  Decimal    @db.Decimal(10, 2)
-  realized_pnl   Decimal    @default(0.00) @db.Decimal(10, 2)
-  total_invested Decimal    @default(0.00) @db.Decimal(10, 2)
-  last_updated   DateTime   @db.Timestamp(6)
+  average_price  Decimal     @db.Decimal(10, 2)
+  realized_pnl   Decimal     @default(0.00) @db.Decimal(10, 2)
+  total_invested Decimal     @default(0.00) @db.Decimal(10, 2)
+  last_updated   DateTime    @db.Timestamp(6)
   instruments    Instrument @relation(fields: [instrument_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "positions_instrumentid_fkey")
-  users          User       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "positions_userid_fkey")
+  users          User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "positions_userid_fkey")
 
   @@unique([user_id, instrument_id], map: "positions_userid_instrumentid_key")
+
   @@map("positions")
 }
 
 model User {
-  id             Int        @id @default(autoincrement())
-  email          String     @unique(map: "users_email_unique") @db.VarChar(255)
-  accountnumber  String     @unique(map: "users_accountnumber_unique") @db.VarChar(20)
-  available_cash Decimal    @default(0.00) @db.Decimal(10, 2)
+  id             Int         @id @default(autoincrement())
+  email          String      @unique(map: "users_email_unique") @db.VarChar(255)
+  accountnumber  String      @unique(map: "users_accountnumber_unique") @db.VarChar(20)
+  available_cash Decimal     @default(0.00) @db.Decimal(10, 2)
   orders         Order[]
   positions      Position[]
 

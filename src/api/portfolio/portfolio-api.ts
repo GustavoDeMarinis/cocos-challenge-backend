@@ -16,5 +16,5 @@ export const handleGetPortfolio = async (
     );
 
     const result = await getPortfolio({ id: userId });
-    return createGetResponse<any>(res, result);
+    return createGetResponse<PortfolioGetResponse>(res, result);
 };

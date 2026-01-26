@@ -55,7 +55,7 @@ describe("Portfolio Service", () => {
                             id: 1,
                             ticker: "AAPL",
                             name: "Apple",
-                            type: "EQUITY",
+                            type: "ACCIONES",
                             marketdata: [
                                 {
                                     close: new Prisma.Decimal(110), // Current price
@@ -101,7 +101,7 @@ describe("Portfolio Service", () => {
                             id: 1,
                             ticker: "TSLA",
                             name: "Tesla",
-                            type: "EQUITY",
+                            type: "ACCIONES",
                             marketdata: [
                                 {
                                     close: new Prisma.Decimal(90),

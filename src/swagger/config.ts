@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { config } from "../config";
 import { portfolioPaths } from "./portfolio/portfolio.swagger";
+import { instrumentPaths } from "./instrument/instrument.swagger";
 
 export const swaggerDocument = {
   openapi: "3.0.1",
@@ -18,6 +19,7 @@ export const swaggerDocument = {
   ],
   paths: {
     ...portfolioPaths,
+    ...instrumentPaths,
   },
 };
 

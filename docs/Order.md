@@ -10,7 +10,7 @@ It is responsible for:
 
 ---
 
-## 🚀 API Endpoint
+## API Endpoint
 
 **`POST /order`**
 
@@ -21,7 +21,7 @@ It is responsible for:
 
 ---
 
-## 🛠️ Order Specifications
+## Order Specifications
 
 ### Supported Order Types
 
@@ -47,7 +47,7 @@ It is responsible for:
 
 ---
 
-## 📝 Request Schema and Validation
+## Request Schema and Validation
 
 The request payload is strictly validated using AJV before reaching the service layer.
 
@@ -68,7 +68,7 @@ The request payload is strictly validated using AJV before reaching the service 
 
 ---
 
-## 🔍 Data Resolution
+## Data Resolution
 
 ### Order Size Resolution
 The final share quantity is resolved in the service layer:
@@ -82,7 +82,7 @@ The final share quantity is resolved in the service layer:
 
 ---
 
-## ⚖️ Business Logic and Side Effects
+## Business Logic and Side Effects
 
 ### Initial Order Status
 The system determines the status before persisting:
@@ -107,7 +107,7 @@ Only orders that transition to `FILLED` status trigger financial changes:
 
 ---
 
-## 📦 API Responses
+## API Responses
 
 ### Success Response (201 Created)
 Returns the created order with denormalized metadata.
@@ -158,7 +158,7 @@ Produced by the AJV validator before reaching business logic.
 
 ---
 
-## 🏛️ Design Decisions & Notes
+## Design Decisions & Notes
 
 - **Unified Ledger**: The `orders` table acts as a full audit log of all financial movements, including deposits and withdrawals.
 - **Stateless Balances**: No derived balances are stored; all validations rely on the current persisted state (truth in database).

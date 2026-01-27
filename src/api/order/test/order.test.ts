@@ -16,37 +16,6 @@ describe("Order Service", () => {
     });
 
     describe("Basic Validations", () => {
-        it("should return error for invalid side", async () => {
-            const result = await insertOrder({
-                userid: 1,
-                side: "INVALID",
-                type: OrderType.LIMIT,
-                instrumentid: 1,
-                size: 10,
-                price: 100
-            });
-
-            expect(result).toEqual({
-                code: ErrorCode.BadRequest,
-                message: "Invalid side",
-            });
-        });
-
-        it("should return error for invalid type", async () => {
-            const result = await insertOrder({
-                userid: 1,
-                side: OrderSide.BUY,
-                type: "INVALID",
-                instrumentid: 1,
-                size: 10,
-                price: 100
-            });
-
-            expect(result).toEqual({
-                code: ErrorCode.BadRequest,
-                message: "Invalid type",
-            });
-        });
 
         it("should return error if instrumentIdToUse is missing for non-cash order", async () => {
             const result = await insertOrder({
@@ -78,21 +47,6 @@ describe("Order Service", () => {
             expect(result).toEqual({
                 code: ErrorCode.NotFound,
                 message: "Instrument Not Found",
-            });
-        });
-
-        it("should return error if price is provided for cash orders", async () => {
-            const result = await insertOrder({
-                userid: 1,
-                side: OrderSide.CASH_IN,
-                type: OrderType.MARKET,
-                cash_amount: 1000,
-                price: 1 // Invalid for cash
-            });
-
-            expect(result).toEqual({
-                code: ErrorCode.BadRequest,
-                message: "Price must be null for cash orders",
             });
         });
 
@@ -341,24 +295,6 @@ describe("Order Service", () => {
     });
 
     describe("Size Resolution Logic", () => {
-        it("should return error if both size and cash_amount are provided", async () => {
-            prismaMock.instrument.findUnique.mockResolvedValue(mockInstrument);
-
-            const result = await insertOrder({
-                userid: 1,
-                instrumentid: 1,
-                side: OrderSide.BUY,
-                type: OrderType.LIMIT,
-                size: 10,
-                cash_amount: 1000,
-                price: 100
-            });
-
-            expect(result).toEqual({
-                code: ErrorCode.BadRequest,
-                message: "Provide either size or cash_amount, not both",
-            });
-        });
 
         it("should return error if cash_amount provided but price is non-positive", async () => {
             prismaMock.instrument.findUnique.mockResolvedValue(mockInstrument);

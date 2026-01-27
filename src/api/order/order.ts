@@ -56,26 +56,6 @@ export const insertOrder = async (
   orderToInsert: OrderToInsert
 ): Promise<OrderResult | ErrorResult> => {
 
-  if (!isOrderSide(orderToInsert.side)) {
-    return {
-      code: ErrorCode.BadRequest,
-      message: "Invalid side",
-    };
-  }
-
-  if (!isOrderType(orderToInsert.type)) {
-    return {
-      code: ErrorCode.BadRequest,
-      message: "Invalid type",
-    };
-  }
-
-  if (isCashOrder(orderToInsert) && orderToInsert.price != null) {
-    return {
-      code: ErrorCode.BadRequest,
-      message: "Price must be null for cash orders",
-    };
-  }
   let instrumentIdToUse = orderToInsert.instrumentid;
 
   if (isCashOrder(orderToInsert)) {
@@ -111,16 +91,14 @@ export const insertOrder = async (
     };
   }
 
-  let price =
+  let price: number | ErrorResult =
     orderToInsert.price != null
       ? decimalToNumber(orderToInsert.price)
       : 0;
 
   if (orderToInsert.type === OrderType.MARKET && price === 0) {
-    const marketPrice = await getMarketPrice(instrumentIdToUse, orderToInsert);
-    if (isErrorResult(marketPrice)) return marketPrice;
-
-    price = marketPrice;
+    price = await getMarketPrice(instrumentIdToUse, orderToInsert);
+    if (isErrorResult(price)) return price;
   }
 
 
@@ -190,13 +168,6 @@ const resolveSize = (
   order: OrderToInsert,
   price: number
 ): number | ErrorResult => {
-
-  if (order.size != null && order.cash_amount != null) {
-    return {
-      code: ErrorCode.BadRequest,
-      message: "Provide either size or cash_amount, not both",
-    };
-  }
   if (order.size != null) {
     return order.size;
   }
@@ -216,19 +187,6 @@ const resolveSize = (
     code: ErrorCode.BadRequest,
     message: "Either size or cash_amount must be provided",
   };
-};
-
-const isOrderSide = (value: string): value is OrderSide => {
-  return (
-    value === OrderSide.BUY ||
-    value === OrderSide.SELL ||
-    value === OrderSide.CASH_IN ||
-    value === OrderSide.CASH_OUT
-  );
-};
-
-const isOrderType = (value: string): value is OrderType => {
-  return value === OrderType.LIMIT || value === OrderType.MARKET;
 };
 
 const resolveInitialStatus = (

@@ -40,7 +40,7 @@ export const orderPostRequestBodySchema = {
             description: "Limit price for the order. Required only for limit orders",
         },
     },
-    required: ["userid","type", "side"],
+    required: ["userid", "type", "side"],
     oneOf: [
         {
             required: ["size"],
@@ -59,6 +59,19 @@ export const orderPostRequestBodySchema = {
             then: {
                 required: ["price"],
             },
+        },
+        {
+            if: {
+                properties: { side: { enum: [OrderSide.CASH_IN, OrderSide.CASH_OUT] } },
+            },
+            then: {
+                required: ["size"],
+                properties: { price: false, cash_amount: false, type: { const: OrderType.MARKET } },
+            },
+        },
+        {
+            if: { not: { properties: { side: { enum: [OrderSide.CASH_IN, OrderSide.CASH_OUT] } } } },
+            then: { required: ["instrumentid"] }
         },
     ],
 } as const;
@@ -111,7 +124,7 @@ export const orderPostResponseSchema = {
         instruments: {
             type: "object",
             description: "Instrument details",
-            properties:{
+            properties: {
                 id: {
                     type: "number",
                     description: "Unique identifier of the instrument",
@@ -130,13 +143,13 @@ export const orderPostResponseSchema = {
                     description: "Type of the instrument",
                 },
             },
-            required:["id", "ticker", "name", "type"],
+            required: ["id", "ticker", "name", "type"],
             additionalProperties: false,
         },
         users: {
             type: "object",
             description: "User details",
-            properties:{
+            properties: {
                 id: {
                     type: "number",
                     description: "Unique identifier of the user",
@@ -155,7 +168,7 @@ export const orderPostResponseSchema = {
                     description: "User available cash",
                 },
             },
-            required:["id", "email", "accountnumber", "available_cash"],
+            required: ["id", "email", "accountnumber", "available_cash"],
             additionalProperties: false,
         },
     },

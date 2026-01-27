@@ -8,46 +8,46 @@ import { decimalToNumber } from "../../utils/calculators";
 const MONEDA_DEFAULT = "PESOS"
 
 type OrderToInsert = {
-    userid: number;
-    instrumentid?: number;
-    size?: number;
-    cash_amount?: number;
-    type: string;
-    side: string;
-    price?: number | Prisma.Decimal;
+  userid: number;
+  instrumentid?: number;
+  size?: number;
+  cash_amount?: number;
+  type: string;
+  side: string;
+  price?: number | Prisma.Decimal;
 };
 
 
 export const OrderSelect = {
-    id: true,
-    userid: true,
-    instrumentid: true,
-    size: true,
-    price: true,
-    type: true,
-    side: true,
-    status: true,
-    datetime: true,
-    instruments: {
-        select: {
-            id: true,
-            ticker: true,
-            name: true,
-            type: true,
-        },
+  id: true,
+  userid: true,
+  instrumentid: true,
+  size: true,
+  price: true,
+  type: true,
+  side: true,
+  status: true,
+  datetime: true,
+  instruments: {
+    select: {
+      id: true,
+      ticker: true,
+      name: true,
+      type: true,
     },
-    users: {
-        select: {
-            id: true,
-            email: true,
-            accountnumber: true,
-            available_cash: true,
-        },
+  },
+  users: {
+    select: {
+      id: true,
+      email: true,
+      accountnumber: true,
+      available_cash: true,
     },
+  },
 } as const;
 
 export const orderArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
-    select: OrderSelect,
+  select: OrderSelect,
 });
 
 export type OrderResult = Prisma.OrderGetPayload<typeof orderArgs>;
@@ -69,27 +69,34 @@ export const insertOrder = async (
       message: "Invalid type",
     };
   }
+
+  if (isCashOrder(orderToInsert) && orderToInsert.price != null) {
+    return {
+      code: ErrorCode.BadRequest,
+      message: "Price must be null for cash orders",
+    };
+  }
   let instrumentIdToUse = orderToInsert.instrumentid;
 
   if (isCashOrder(orderToInsert)) {
-      const cashInstrument = await prisma.instrument.findFirst({
-          where: { type: "MONEDA", name: MONEDA_DEFAULT },
-      });
+    const cashInstrument = await prisma.instrument.findFirst({
+      where: { type: "MONEDA", name: MONEDA_DEFAULT },
+    });
 
-      if (!cashInstrument) {
-          return {
-              code: ErrorCode.NotFound,
-              message: "Instrument for cash operations not found",
-          };
-      }
+    if (!cashInstrument) {
+      return {
+        code: ErrorCode.NotFound,
+        message: "Instrument for cash operations not found",
+      };
+    }
 
-      instrumentIdToUse = cashInstrument.id;
+    instrumentIdToUse = cashInstrument.id;
   }
 
   if (!instrumentIdToUse) {
     return {
-        code: ErrorCode.BadRequest,
-        message: "Instrument ID must be provided for this type of order",
+      code: ErrorCode.BadRequest,
+      message: "Instrument ID must be provided for this type of order",
     };
   }
 
@@ -170,8 +177,8 @@ export const insertOrder = async (
     await applyFilledOrderEffects(tx, order);
 
     const updatedOrder = await tx.order.findUnique({
-    where: { id: order.id },
-    select: OrderSelect,
+      where: { id: order.id },
+      select: OrderSelect,
     });
 
     return updatedOrder!;
@@ -180,81 +187,88 @@ export const insertOrder = async (
 
 
 const resolveSize = (
-    order: OrderToInsert,
-    price: number
+  order: OrderToInsert,
+  price: number
 ): number | ErrorResult => {
-    if (order.size != null) {
-        return order.size;
-    }
 
-    if (order.cash_amount != null) {
-        if (price <= 0) {
-            return {
-                code: ErrorCode.BadRequest,
-                message: "Cannot calculate size without price",
-            };
-        }
-
-        return Math.floor(order.cash_amount / price);
-    }
-
+  if (order.size != null && order.cash_amount != null) {
     return {
-        code: ErrorCode.BadRequest,
-        message: "Either size or cash_amount must be provided",
+      code: ErrorCode.BadRequest,
+      message: "Provide either size or cash_amount, not both",
     };
+  }
+  if (order.size != null) {
+    return order.size;
+  }
+
+  if (order.cash_amount != null) {
+    if (price <= 0) {
+      return {
+        code: ErrorCode.BadRequest,
+        message: "Cannot calculate size without price",
+      };
+    }
+
+    return Math.floor(order.cash_amount / price);
+  }
+
+  return {
+    code: ErrorCode.BadRequest,
+    message: "Either size or cash_amount must be provided",
+  };
 };
 
 const isOrderSide = (value: string): value is OrderSide => {
-    return (
-        value === OrderSide.BUY ||
-        value === OrderSide.SELL ||
-        value === OrderSide.CASH_IN ||
-        value === OrderSide.CASH_OUT
-    );
+  return (
+    value === OrderSide.BUY ||
+    value === OrderSide.SELL ||
+    value === OrderSide.CASH_IN ||
+    value === OrderSide.CASH_OUT
+  );
 };
 
 const isOrderType = (value: string): value is OrderType => {
-    return value === OrderType.LIMIT || value === OrderType.MARKET;
+  return value === OrderType.LIMIT || value === OrderType.MARKET;
 };
 
 const resolveInitialStatus = (
-    order: OrderToInsert,
-    user: User & { positions: Position[] },
-    size: number,
-    price: number
+  order: OrderToInsert,
+  user: User & { positions: Position[] },
+  size: number,
+  price: number
 ): OrderStatus => {
-    if (
-       order.side === OrderSide.CASH_IN
-    ) {
-        return OrderStatus.FILLED;
+  if (
+    order.side === OrderSide.CASH_IN
+  ) {
+    return OrderStatus.FILLED;
+  }
+
+  if (order.side === OrderSide.BUY) {
+    const requiredCash = size * price;
+    if (decimalToNumber(user.available_cash) < requiredCash) {
+      return OrderStatus.REJECTED;
     }
+  }
 
-    if (order.side === OrderSide.BUY) {
-        const requiredCash = size * price;
-        if (decimalToNumber(user.available_cash) < requiredCash) {
-            return OrderStatus.REJECTED;
-        }
+  if (order.side === OrderSide.CASH_OUT) {
+    const requiredCash = size;
+
+    if (decimalToNumber(user.available_cash) < requiredCash) {
+      return OrderStatus.REJECTED;
     }
+  }
 
-    if (order.side === OrderSide.CASH_OUT) {
-        const requiredCash = size;
+  if (order.side === OrderSide.SELL) {
+    const available = user.positions[0]?.size ?? 0;
 
-        if (decimalToNumber(user.available_cash) < requiredCash) {
-            return OrderStatus.REJECTED;
-        }
+    if (available < size) {
+      return OrderStatus.REJECTED;
     }
+  }
 
-    if (order.side === OrderSide.SELL) {
-        const available = user.positions[0]?.size ?? 0;
-
-        if (available < size) {
-            return OrderStatus.REJECTED;
-        }
-    }
-
-    return order.type === OrderType.MARKET
-        ? OrderStatus.FILLED
-        : OrderStatus.NEW;
+  return order.type === OrderType.MARKET
+    ? OrderStatus.FILLED
+    : OrderStatus.NEW;
 };
 
 const applyFilledOrderEffects = async (
@@ -301,13 +315,13 @@ export const applyBuy = async (
       },
     });
 
-        await tx.user.update({
-    where: { id: order.userid },
-    data: {
+    await tx.user.update({
+      where: { id: order.userid },
+      data: {
         available_cash: {
-        decrement: order.size * decimalToNumber(order.price),
+          decrement: order.size * decimalToNumber(order.price),
         },
-    },
+      },
     });
     return;
   }
@@ -403,10 +417,10 @@ const applyCashOut = async (
 };
 
 const getMarketPrice = async (instrumentid: number, order: OrderToInsert): Promise<number | ErrorResult> => {
-  if(isCashOrder(order)){
+  if (isCashOrder(order)) {
     return 1
   }
-  
+
   const lastMarketData = await prisma.marketData.findFirst({
     where: { instrumentid },
     orderBy: { date: "desc" },

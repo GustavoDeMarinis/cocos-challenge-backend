@@ -7,6 +7,7 @@ import { ErrorResponse } from "../../utils/shared-types";
 import { InstrumentSearchRequestQueryParams, InstrumentSearchResponse } from "./instrument-api.types";
 import { searchInstrument } from "./instrument";
 import { isErrorResult } from "../../utils/exceptions";
+import { decimalToNumber } from "../../utils/calculators";
 
 export const handleSearchInstrument = async (req: Request, res: Response):
  Promise<Response<InstrumentSearchResponse> | Response<ErrorResponse>> => {
@@ -29,9 +30,9 @@ export const handleSearchInstrument = async (req: Request, res: Response):
         return {
             ...item,
             marketdata: {
-                close: latestMarketData?.close?.toNumber() ?? null,
-                previousclose: latestMarketData?.previousclose?.toNumber() ?? null,
-                date: latestMarketData?.date?.toISOString() ?? null,
+                close: latestMarketData?.close ? decimalToNumber(latestMarketData?.close) : null,
+                previousclose: latestMarketData?.previousclose ? decimalToNumber(latestMarketData?.previousclose) : null,
+                date: latestMarketData?.date ?? null,
             }
         };
     });

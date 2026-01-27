@@ -47,6 +47,7 @@ export const instrumentSearchResponseSchema ={
                             },
                             date: {
                                 type: "string",
+                                format: "date-time",
                                 nullable:true
                             },
                         },

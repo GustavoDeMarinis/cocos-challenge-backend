@@ -1,3 +1,4 @@
+import { InstrumentType } from "../instrument/instrument-api.types";
 import { OrderSide, OrderStatus, OrderType } from "./order-api.types";
 
 export const orderPostRequestBodySchema = {
@@ -25,12 +26,12 @@ export const orderPostRequestBodySchema = {
         },
         type: {
             type: "string",
-            enum: OrderType,
+            enum: Object.values(OrderType),
             description: "Order type (e.g. market or limit)",
         },
         side: {
             type: "string",
-            enum: OrderSide,
+            enum: Object.values(OrderSide),
             description: "Order direction: BUY, SELL, CASH_IN (deposit), or CASH_OUT (withdrawal)",
         },
         price: {
@@ -39,7 +40,7 @@ export const orderPostRequestBodySchema = {
             description: "Limit price for the order. Required only for limit orders",
         },
     },
-    required: ["userid", "instrumentid", "type", "side"],
+    required: ["userid","type", "side"],
     oneOf: [
         {
             required: ["size"],
@@ -84,21 +85,22 @@ export const orderPostResponseSchema = {
         },
         price: {
             type: "number",
+            format: "decimal",
             description: "Price per share",
         },
         type: {
             type: "string",
-            enum: OrderType,
+            enum: Object.values(OrderType),
             description: "Order type",
         },
         side: {
             type: "string",
-            enum: OrderSide,
+            enum: Object.values(OrderSide),
             description: "Order side",
         },
         status: {
             type: "string",
-            enum: OrderStatus,
+            enum: Object.values(OrderStatus),
             description: "Order status",
         },
         datetime: {
@@ -109,12 +111,54 @@ export const orderPostResponseSchema = {
         instruments: {
             type: "object",
             description: "Instrument details",
+            properties:{
+                id: {
+                    type: "number",
+                    description: "Unique identifier of the instrument",
+                },
+                ticker: {
+                    type: "string",
+                    description: "Ticker symbol of the instrument",
+                },
+                name: {
+                    type: "string",
+                    description: "Name of the instrument",
+                },
+                type: {
+                    type: "string",
+                    enum: Object.values(InstrumentType),
+                    description: "Type of the instrument",
+                },
+            },
+            required:["id", "ticker", "name", "type"],
+            additionalProperties: false,
         },
         users: {
             type: "object",
             description: "User details",
+            properties:{
+                id: {
+                    type: "number",
+                    description: "Unique identifier of the user",
+                },
+                email: {
+                    type: "string",
+                    description: "User email",
+                },
+                accountnumber: {
+                    type: "string",
+                    description: "User account number",
+                },
+                available_cash: {
+                    type: "number",
+                    format: "decimal",
+                    description: "User available cash",
+                },
+            },
+            required:["id", "email", "accountnumber", "available_cash"],
+            additionalProperties: false,
         },
     },
-    required: ["id", "userid", "instrumentid", "size", "price", "type", "side", "status", "datetime"],
+    required: ["id", "userid", "instrumentid", "size", "price", "type", "side", "status", "datetime", "instruments", "users"],
+    additionalProperties: false,
 } as const;
-

@@ -5,9 +5,11 @@ import { OrderSide, OrderStatus, OrderType } from "./order-api.types";
 import { isErrorResult } from "../../utils/exceptions";
 import { decimalToNumber } from "../../utils/calculators";
 
+const MONEDA_DEFAULT = "PESOS"
+
 type OrderToInsert = {
     userid: number;
-    instrumentid: number;
+    instrumentid?: number;
     size?: number;
     cash_amount?: number;
     type: string;
@@ -51,79 +53,131 @@ export const orderArgs = Prisma.validator<Prisma.OrderDefaultArgs>()({
 export type OrderResult = Prisma.OrderGetPayload<typeof orderArgs>;
 
 export const insertOrder = async (
-    orderToInsert: OrderToInsert
+  orderToInsert: OrderToInsert
 ): Promise<OrderResult | ErrorResult> => {
 
-   const user = await prisma.user.findUnique({
-    where: { id: orderToInsert.userid },
-    include: {
+  if (!isOrderSide(orderToInsert.side)) {
+    return {
+      code: ErrorCode.BadRequest,
+      message: "Invalid side",
+    };
+  }
+
+  if (!isOrderType(orderToInsert.type)) {
+    return {
+      code: ErrorCode.BadRequest,
+      message: "Invalid type",
+    };
+  }
+  let instrumentIdToUse = orderToInsert.instrumentid;
+
+  if (isCashOrder(orderToInsert)) {
+      const cashInstrument = await prisma.instrument.findFirst({
+          where: { type: "MONEDA", name: MONEDA_DEFAULT },
+      });
+
+      if (!cashInstrument) {
+          return {
+              code: ErrorCode.NotFound,
+              message: "Instrument for cash operations not found",
+          };
+      }
+
+      instrumentIdToUse = cashInstrument.id;
+  }
+
+  if (!instrumentIdToUse) {
+    return {
+        code: ErrorCode.BadRequest,
+        message: "Instrument ID must be provided for this type of order",
+    };
+  }
+
+  const instrument = await prisma.instrument.findUnique({
+    where: { id: instrumentIdToUse },
+  });
+
+  if (!instrument) {
+    return {
+      code: ErrorCode.NotFound,
+      message: "Instrument Not Found",
+    };
+  }
+
+  let price =
+    orderToInsert.price != null
+      ? decimalToNumber(orderToInsert.price)
+      : 0;
+
+  if (orderToInsert.type === OrderType.MARKET && price === 0) {
+    const marketPrice = await getMarketPrice(instrumentIdToUse, orderToInsert);
+    if (isErrorResult(marketPrice)) return marketPrice;
+
+    price = marketPrice;
+  }
+
+
+  const sizeResult = resolveSize(orderToInsert, price);
+  if (isErrorResult(sizeResult)) {
+    return sizeResult;
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: orderToInsert.userid },
+      include: {
         positions: {
-            where: {
-                instrument_id: orderToInsert.instrumentid,
-            },
+          where: {
+            instrument_id: instrumentIdToUse,
+          },
         },
-    },
+      },
     });
+
     if (!user) {
-        return {
-            code: ErrorCode.NotFound,
-            message: "User Not Found"
-        };
+      return {
+        code: ErrorCode.NotFound,
+        message: "User Not Found",
+      };
     }
 
-    const instrument = await prisma.instrument.findUnique({
-        where: { id: orderToInsert.instrumentid },
+    const status = resolveInitialStatus(
+      orderToInsert,
+      user,
+      sizeResult,
+      price
+    );
+
+
+    const order = await tx.order.create({
+      select: OrderSelect,
+      data: {
+        userid: orderToInsert.userid,
+        instrumentid: instrumentIdToUse,
+        size: sizeResult,
+        price,
+        type: orderToInsert.type,
+        side: orderToInsert.side,
+        status,
+        datetime: new Date(),
+      },
     });
-    if (!instrument) {
-        return {
-            code: ErrorCode.NotFound,
-            message: "Instrument Not Found"
-        };
+
+    if (order.status !== OrderStatus.FILLED) {
+      return order;
     }
 
-    if (!isOrderSide(orderToInsert.side)) {
-        return {
-            code: ErrorCode.BadRequest,
-            message: "Invalid side"
-        };
-    }
+    await applyFilledOrderEffects(tx, order);
 
-    if (!isOrderType(orderToInsert.type)) {
-        return {
-            code: ErrorCode.BadRequest,
-            message: "Invalid type"
-        };
-    }
-
-    const price =
-        orderToInsert.price != null
-            ? Number(orderToInsert.price)
-            : 0;
-
-
-    const sizeResult = resolveSize(orderToInsert, price);
-
-    if (isErrorResult(sizeResult)) {
-        return sizeResult;
-    }
-
-    const status = resolveInitialStatus(orderToInsert, user, sizeResult, price);
-
-    const order = await prisma.order.create({
-        select: OrderSelect,
-        data: {
-            userid: orderToInsert.userid,
-            instrumentid: orderToInsert.instrumentid,
-            size: sizeResult,
-            price,
-            type: orderToInsert.type,
-            side: orderToInsert.side,
-            status,
-            datetime: new Date(),
-        },
+    const updatedOrder = await tx.order.findUnique({
+    where: { id: order.id },
+    select: OrderSelect,
     });
-    return order;
+
+    return updatedOrder!;
+  });
 };
+
 
 const resolveSize = (
     order: OrderToInsert,
@@ -170,8 +224,7 @@ const resolveInitialStatus = (
     price: number
 ): OrderStatus => {
     if (
-        order.side === OrderSide.CASH_IN ||
-        order.side === OrderSide.CASH_OUT
+       order.side === OrderSide.CASH_IN
     ) {
         return OrderStatus.FILLED;
     }
@@ -202,4 +255,179 @@ const resolveInitialStatus = (
     return order.type === OrderType.MARKET
         ? OrderStatus.FILLED
         : OrderStatus.NEW;
+};
+
+const applyFilledOrderEffects = async (
+  tx: Prisma.TransactionClient,
+  order: OrderResult,
+) => {
+  switch (order.side) {
+    case OrderSide.BUY:
+      return applyBuy(tx, order);
+
+    case OrderSide.SELL:
+      return applySell(tx, order);
+
+    case OrderSide.CASH_IN:
+      return applyCashIn(tx, order);
+
+    case OrderSide.CASH_OUT:
+      return applyCashOut(tx, order);
+  }
+};
+
+
+export const applyBuy = async (
+  tx: Prisma.TransactionClient,
+  order: OrderResult
+): Promise<void> => {
+  const position = await tx.position.findUnique({
+    where: {
+      user_id_instrument_id: {
+        user_id: order.userid,
+        instrument_id: order.instrumentid,
+      },
+    },
+  });
+
+  if (!position) {
+    await tx.position.create({
+      data: {
+        user_id: order.userid,
+        instrument_id: order.instrumentid,
+        size: order.size,
+        average_price: order.price,
+        last_updated: new Date(),
+      },
+    });
+
+        await tx.user.update({
+    where: { id: order.userid },
+    data: {
+        available_cash: {
+        decrement: order.size * decimalToNumber(order.price),
+        },
+    },
+    });
+    return;
+  }
+
+  const currentSize = position.size;
+  const currentAvg = position.average_price;
+
+  const newSize = position.size + order.size;
+
+  const newAveragePrice = currentAvg
+    .mul(currentSize)
+    .add(order.price.mul(order.size))
+    .div(newSize);
+
+  await tx.position.update({
+    where: {
+      user_id_instrument_id: {
+        user_id: order.userid,
+        instrument_id: order.instrumentid,
+      },
+    },
+    data: {
+      size: newSize,
+      average_price: newAveragePrice,
+      last_updated: new Date(),
+    },
+  });
+
+  await tx.user.update({
+    where: { id: order.userid },
+    data: {
+      available_cash: {
+        decrement: order.size * decimalToNumber(order.price),
+      },
+    },
+  });
+};
+
+const applySell = async (
+  tx: Prisma.TransactionClient,
+  order: OrderResult,
+) => {
+  const revenue = order.size * decimalToNumber(order.price);
+
+  await tx.user.update({
+    where: { id: order.userid },
+    data: {
+      available_cash: {
+        increment: revenue,
+      },
+    },
+  });
+
+  await tx.position.update({
+    where: {
+      user_id_instrument_id: {
+        user_id: order.userid,
+        instrument_id: order.instrumentid,
+      },
+    },
+    data: {
+      size: { decrement: order.size },
+    },
+  });
+};
+
+const applyCashIn = async (
+  tx: Prisma.TransactionClient,
+  order: OrderResult
+) => {
+  await tx.user.update({
+    where: { id: order.userid },
+    data: {
+      available_cash: {
+        increment: order.size,
+      },
+    },
+  });
+};
+
+const applyCashOut = async (
+  tx: Prisma.TransactionClient,
+  order: OrderResult
+) => {
+  await tx.user.update({
+    where: { id: order.userid },
+    data: {
+      available_cash: {
+        decrement: order.size,
+      },
+    },
+  });
+};
+
+const getMarketPrice = async (instrumentid: number, order: OrderToInsert): Promise<number | ErrorResult> => {
+  if(isCashOrder(order)){
+    return 1
+  }
+  
+  const lastMarketData = await prisma.marketData.findFirst({
+    where: { instrumentid },
+    orderBy: { date: "desc" },
+  });
+
+  if (!lastMarketData) {
+    return {
+      code: ErrorCode.BadRequest,
+      message: "No market data available for instrument",
+    };
+  }
+
+  if (lastMarketData.close == null) {
+    return {
+      code: ErrorCode.BadRequest,
+      message: "Cannot execute MARKET order: last close price is null",
+    };
+  }
+  return decimalToNumber(lastMarketData.close);
+};
+
+const isCashOrder = (order: OrderToInsert): boolean => {
+  return order.side === OrderSide.CASH_IN || order.side === OrderSide.CASH_OUT;
 };

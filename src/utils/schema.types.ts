@@ -6,7 +6,8 @@ export type CommonDeserializationOptions = {
     JSONInputDeserializationConfig,
     JSONInputDeserializationConfigArray,
     DateDeserializationNullableConfig,
-    DecimalDeserializationConfig
+    DecimalDeserializationConfig,
+    DecimalDeserializationNullableConfig
   ];
 };
 
@@ -23,6 +24,14 @@ export type DecimalDeserializationConfig = {
     format: "decimal";
   };
   output: Prisma.Decimal;
+};
+
+export type DecimalDeserializationNullableConfig = {
+  pattern: {
+    type: "number";
+    format: "decimal-nullable";
+  };
+  output: Prisma.Decimal | null;
 };
 
 export type JSONInputDeserializationConfigArray = {

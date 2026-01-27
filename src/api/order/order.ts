@@ -4,7 +4,8 @@ import { ErrorCode, ErrorResult } from "../../utils/shared-types";
 import { OrderSide, OrderStatus, OrderType } from "./order-api.types";
 import { isErrorResult } from "../../utils/exceptions";
 import { decimalToNumber } from "../../utils/calculators";
-
+import { logDebug } from "../../utils/logging";
+const subService = "order/service";
 const MONEDA_DEFAULT = "PESOS"
 
 type OrderToInsert = {
@@ -146,6 +147,15 @@ export const insertOrder = async (
         status,
         datetime: new Date(),
       },
+    });
+
+    logDebug({
+      subService,
+      message: `Order created`,
+      details: {
+        order: order,
+      },
+
     });
 
     if (order.status !== OrderStatus.FILLED) {

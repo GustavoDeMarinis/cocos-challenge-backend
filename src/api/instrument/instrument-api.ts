@@ -5,12 +5,9 @@ import { getPaginationOptions } from "../../utils/pagination";
 import { createGetArrayResponse } from "../../utils/http-response-factory";
 import { ErrorResponse } from "../../utils/shared-types";
 import { InstrumentSearchRequestQueryParams, InstrumentSearchResponse } from "./instrument-api.types";
-import { searchInstrument } from "./instrument";
-import { isErrorResult } from "../../utils/exceptions";
-import { decimalToNumber } from "../../utils/calculators";
-
+import { InstrumentResult, searchInstrument } from "./instrument";
 export const handleSearchInstrument = async (req: Request, res: Response):
- Promise<Response<InstrumentSearchResponse> | Response<ErrorResponse>> => {
+    Promise<Response<InstrumentSearchResponse> | Response<ErrorResponse>> => {
     const { pageOffset, pageLimit, ...query } =
         validateJSONSchemaObject<InstrumentSearchRequestQueryParams>(
             instrumentSearchRequestQueryParamsSchema,
@@ -21,27 +18,8 @@ export const handleSearchInstrument = async (req: Request, res: Response):
         pageLimit: pageLimit,
         pageOffset: pageOffset,
     });
-    const items = await searchInstrument(query, pagination);
-    if(isErrorResult(items)){
-        return createGetArrayResponse(res, items);
-    }
-    const result = items.items.map((item) => {
-        const latestMarketData = item.marketdata[0];
-        return {
-            ...item,
-            marketdata: {
-                close: latestMarketData?.close ? decimalToNumber(latestMarketData?.close) : null,
-                previousclose: latestMarketData?.previousclose ? decimalToNumber(latestMarketData?.previousclose) : null,
-                date: latestMarketData?.date ?? null,
-            }
-        };
-    });
+    const result = await searchInstrument(query, pagination);
 
-    return createGetArrayResponse<
-  InstrumentSearchResponse["items"][number]
->(
-  res,
-  { ...items, items: result },
-  { pagination }
-);
+
+    return createGetArrayResponse<InstrumentResult>(res, result, { pagination });
 }

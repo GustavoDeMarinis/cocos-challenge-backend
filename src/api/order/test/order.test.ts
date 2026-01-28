@@ -108,6 +108,35 @@ describe("Order Service", () => {
                     data: { available_cash: { increment: 1000 } }
                 }));
             });
+
+            it("should handle successful CASH_IN with direct size", async () => {
+                prismaMock.instrument.findFirst.mockResolvedValue(cashInstrument);
+                prismaMock.instrument.findUnique.mockResolvedValue(cashInstrument);
+                prismaMock.user.findUnique.mockResolvedValue({ ...mockUser, positions: [] } as any);
+                prismaMock.order.create.mockResolvedValue({
+                    status: OrderStatus.FILLED,
+                    size: 1000,
+                    price: new Prisma.Decimal(1)
+                } as any);
+                prismaMock.order.findUnique.mockResolvedValue({
+                    status: OrderStatus.FILLED,
+                    size: 1000,
+                    price: new Prisma.Decimal(1)
+                } as any);
+
+                const result = await insertOrder({
+                    userid: 1,
+                    side: OrderSide.CASH_IN,
+                    type: OrderType.MARKET,
+                    size: 1000
+                });
+
+                expect(result).toMatchObject({
+                    status: OrderStatus.FILLED,
+                    size: 1000,
+                    price: new Prisma.Decimal(1)
+                });
+            });
         });
 
         describe("CASH_OUT", () => {
@@ -149,6 +178,35 @@ describe("Order Service", () => {
                 expect(prismaMock.user.update).toHaveBeenCalledWith(expect.objectContaining({
                     data: { available_cash: { decrement: 500 } }
                 }));
+            });
+
+            it("should handle successful CASH_OUT with direct size", async () => {
+                prismaMock.instrument.findFirst.mockResolvedValue(cashInstrument);
+                prismaMock.instrument.findUnique.mockResolvedValue(cashInstrument);
+                prismaMock.user.findUnique.mockResolvedValue({ ...mockUser, positions: [] } as any);
+                prismaMock.order.create.mockResolvedValue({
+                    status: OrderStatus.FILLED,
+                    size: 500,
+                    price: new Prisma.Decimal(1)
+                } as any);
+                prismaMock.order.findUnique.mockResolvedValue({
+                    status: OrderStatus.FILLED,
+                    size: 500,
+                    price: new Prisma.Decimal(1)
+                } as any);
+
+                const result = await insertOrder({
+                    userid: 1,
+                    side: OrderSide.CASH_OUT,
+                    type: OrderType.MARKET,
+                    size: 500
+                });
+
+                expect(result).toMatchObject({
+                    status: OrderStatus.FILLED,
+                    size: 500,
+                    price: new Prisma.Decimal(1)
+                });
             });
 
             it("should reject CASH_OUT if insufficient cash", async () => {
@@ -295,6 +353,51 @@ describe("Order Service", () => {
     });
 
     describe("Size Resolution Logic", () => {
+        it("should calculate size correctly from cash_amount in LIMIT order", async () => {
+            prismaMock.instrument.findUnique.mockResolvedValue(mockInstrument);
+            prismaMock.user.findUnique.mockResolvedValue({ ...mockUser, positions: [] } as any);
+            prismaMock.order.create.mockResolvedValue({
+                id: 72,
+                status: OrderStatus.NEW,
+                size: 2,
+                price: new Prisma.Decimal(10)
+            } as any);
+
+            const result = await insertOrder({
+                userid: 2,
+                instrumentid: 1,
+                cash_amount: 28,
+                type: OrderType.LIMIT,
+                side: OrderSide.BUY,
+                price: 10
+            });
+
+            expect(result).toMatchObject({
+                size: 2,
+                status: OrderStatus.NEW
+            });
+        });
+
+        it("should reject order if calculated size is 0 (cash_amount < price)", async () => {
+            prismaMock.instrument.findUnique.mockResolvedValue(mockInstrument);
+            prismaMock.user.findUnique.mockResolvedValue({ ...mockUser, positions: [] } as any);
+            prismaMock.order.create.mockResolvedValue({
+                status: OrderStatus.REJECTED
+            } as any);
+
+            const result = await insertOrder({
+                userid: 1,
+                instrumentid: 1,
+                cash_amount: 5,
+                type: OrderType.LIMIT,
+                side: OrderSide.BUY,
+                price: 10
+            });
+
+            expect(result).toMatchObject({
+                status: OrderStatus.REJECTED
+            });
+        });
 
         it("should return error if cash_amount provided but price is non-positive", async () => {
             prismaMock.instrument.findUnique.mockResolvedValue(mockInstrument);

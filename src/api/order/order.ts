@@ -241,7 +241,9 @@ const resolveInitialStatus = (
       return OrderStatus.REJECTED;
     }
   }
-
+  if (size <= 0) {
+    return OrderStatus.REJECTED;
+  }
   return order.type === OrderType.MARKET
     ? OrderStatus.FILLED
     : OrderStatus.NEW;

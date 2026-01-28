@@ -109,7 +109,7 @@ Only orders that transition to `FILLED` status trigger financial changes:
 
 ## API Responses
 
-### Success Response (201 Created)
+### Success Response - Market Buy (201 Created)
 Returns the created order with denormalized metadata.
 
 ```json
@@ -134,6 +134,48 @@ Returns the created order with denormalized metadata.
     "email": "user@test.com",
     "accountnumber": "10001",
     "available_cash": 1142
+  }
+}
+```
+
+### Success Response - Calculated Size (Limit Buy)
+This scenario shows how `size` is resolved when `cash_amount` and `price` are provided in a LIMIT order (Size = `floor(28 / 10) = 2`).
+
+**Input:**
+```json
+{
+  "userid": 2,
+  "instrumentid": 1,
+  "cash_amount": 28,
+  "type": "LIMIT",
+  "side": "BUY",
+  "price": 10
+}
+```
+
+**Output:**
+```json
+{
+  "id": 72,
+  "userid": 2,
+  "instrumentid": 1,
+  "size": 2,
+  "price": 10,
+  "type": "LIMIT",
+  "side": "BUY",
+  "status": "NEW",
+  "datetime": "2026-01-28T01:51:37.454Z",
+  "instruments": {
+    "id": 1,
+    "ticker": "DYCA",
+    "name": "Dycasa S.A.",
+    "type": "ACCIONES"
+  },
+  "users": {
+    "id": 2,
+    "email": "jose@test.com",
+    "accountnumber": "10002",
+    "available_cash": 382
   }
 }
 ```

@@ -3,7 +3,7 @@ import prisma from "../../integrations/prisma/prisma-client";
 import { ErrorCode, ErrorResult } from "../../utils/shared-types";
 import { OrderSide, OrderStatus, OrderType } from "./order-api.types";
 import { isErrorResult } from "../../utils/exceptions";
-import { decimalToNumber } from "../../utils/calculators";
+import { decimalToNumber } from "../../utils/data-transformers";
 import { logDebug } from "../../utils/logging";
 const subService = "order/service";
 const MONEDA_DEFAULT = "PESOS"

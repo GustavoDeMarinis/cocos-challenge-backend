@@ -68,7 +68,12 @@ Run unit/integration tests:
 npm test
 ```
 
-## Future Improvements (Carefully Scoped)
+You can also explore and manually test the API using Swagger at:
+```bash
+http://localhost:5000/api-docs/
+```
+
+## Future Improvements 
 
 The following improvements are acknowledged as valuable next steps:
 

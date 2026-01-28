@@ -9,12 +9,12 @@ export const instrumentSearchRequestQueryParamsSchema = {
         ticker: {
             type: "string",
         },
-    ...paginationRequestPropertySchema,
+        ...paginationRequestPropertySchema,
     },
     additionalProperties: false,
 } as const
 
-export const instrumentSearchResponseSchema ={
+export const instrumentSearchResponseSchema = {
     type: "object",
     properties: {
         items: {
@@ -34,25 +34,29 @@ export const instrumentSearchResponseSchema ={
                     type: {
                         type: "string",
                     },
-                    marketdata:{
-                        type: "object",
-                        properties: {
-                            close: {
-                                type: "number",
-                                nullable:true
+                    marketdata: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            properties: {
+                                close: {
+                                    type: "number",
+                                    format: "decimal-nullable",
+                                },
+                                previousclose: {
+                                    type: "number",
+                                    format: "decimal-nullable",
+                                },
+                                date: {
+                                    type: "string",
+                                    format: "date-time",
+                                    nullable: true
+                                },
                             },
-                            previousclose: {
-                                type: "number",
-                                nullable:true
-                            },
-                            date: {
-                                type: "string",
-                                nullable:true
-                            },
-                        },
-                        required: ["close", "previousclose", "date"],
-                        additionalProperties: false,
-                    }
+                            required: ["close", "previousclose", "date"],
+                            additionalProperties: false,
+                        }
+                    },
                 },
                 required: ["id", "name", "ticker", "type", "marketdata"],
                 additionalProperties: false,

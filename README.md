@@ -7,7 +7,7 @@ Backend API for the Cocos Challenge, developed using Node.js and Express.
 This API allows users to:
 - View their [Portfolio](docs/Portfolio.md) (total value, available cash, asset list with performance).
 - Search for [Instruments](docs/Instrument.md) (by ticker or name with pagination).
-- Place market and limit orders (Buy/Sell).
+- Place market and limit [Orders](docs/Order.md) (Buy/Sell, Cash Deposits/Withdrawals).
 
 ## Tech Stack
 
@@ -37,7 +37,8 @@ This API allows users to:
 ### Database Setup
 
 1.  Initialize Prisma:
-    ```npx prisma init
+    ```bash
+    npx prisma init
     ```
 2.  Run Prisma Db Pull:
     ```bash
@@ -66,3 +67,29 @@ Run unit/integration tests:
 ```bash
 npm test
 ```
+
+## Future Improvements (Carefully Scoped)
+
+The following improvements are acknowledged as valuable next steps:
+
+- Endpoint Specialization  
+  Replace the single unified POST /order endpoint with intent-specific endpoints such as:
+
+  ```
+  POST /orders/buy/market
+  POST /orders/sell/limit
+  POST /orders/cash-in
+  POST /orders/cash-out
+  ```
+
+  This would significantly reduce conditional validation logic, make business intent explicit at the API level, simplify schemas, and reduce the risk of invalid field combinations as the domain grows.
+
+
+- Stronger Identifiers  
+  Replacing auto-increment IDs with UUID-based identifiers for public-facing resources.
+
+- Database Enums  
+  Enforcing domain constraints directly at the storage level.
+
+- Containerization  
+  Dockerized application and database for safer local development and testing.

@@ -92,14 +92,22 @@ export const insertOrder = async (
     };
   }
 
-  let price: number | ErrorResult =
-    orderToInsert.price != null
-      ? decimalToNumber(orderToInsert.price)
-      : 0;
+  let price: number | ErrorResult | undefined = undefined;
 
-  if (orderToInsert.type === OrderType.MARKET && price === 0) {
+  // CASH
+  if (isCashOrder(orderToInsert)) {
+    price = 1;
+  }
+
+  // MARKET
+  if (price === undefined && orderToInsert.type === OrderType.MARKET) {
     price = await getMarketPrice(instrumentIdToUse, orderToInsert);
     if (isErrorResult(price)) return price;
+  }
+
+  // LIMIT
+  if (price === undefined) {
+    price = decimalToNumber(orderToInsert.price!);
   }
 
 

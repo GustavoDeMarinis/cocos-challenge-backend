@@ -52,6 +52,15 @@ export const orderPostRequestBodySchema = {
     allOf: [
         {
             if: {
+                properties: { side: { enum: [OrderSide.CASH_IN, OrderSide.CASH_OUT] } },
+            },
+            then: {
+                required: ["size"],
+                properties: { price: false, cash_amount: false, instrumentid: false, type: { const: OrderType.MARKET } },
+            },
+        },
+        {
+            if: {
                 properties: {
                     type: { const: OrderType.LIMIT },
                 },
@@ -59,19 +68,6 @@ export const orderPostRequestBodySchema = {
             then: {
                 required: ["price"],
             },
-        },
-        {
-            if: {
-                properties: { side: { enum: [OrderSide.CASH_IN, OrderSide.CASH_OUT] } },
-            },
-            then: {
-                required: ["size"],
-                properties: { price: false, cash_amount: false, type: { const: OrderType.MARKET } },
-            },
-        },
-        {
-            if: { not: { properties: { side: { enum: [OrderSide.CASH_IN, OrderSide.CASH_OUT] } } } },
-            then: { required: ["instrumentid"] }
         },
     ],
 } as const;

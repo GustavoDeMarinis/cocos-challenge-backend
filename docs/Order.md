@@ -164,4 +164,5 @@ Produced by the AJV validator before reaching business logic.
 - **Stateless Balances**: No derived balances are stored; all validations rely on the current persisted state (truth in database).
 - **Traceability**: `REJECTED` orders are stored to provide a complete history of user attempts.
 - **Average Price Logic**: `BUY` operations recalculate position average price to allow for PnL analysis (used in Portfolio).
+- **Cash as Market Orders**: Cash operations are forced to `MARKET` type because they are immediate balance adjustments that do not require a matching engine or price discovery. This avoids the need for a `price` field (which is always 1) and ensures instant execution (Status: `FILLED`).
 - **Scope**: Cancel/Update order endpoints were intentionally excluded as they were not part of the initial requirements.

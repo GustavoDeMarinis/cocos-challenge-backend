@@ -119,7 +119,7 @@ export function createPostResponse<T extends ResultWithOptionalId>(
       response.setHeader(
         "Location",
         customLocationHeader ||
-          `${request.originalUrl}/${result.internalErrorDetails?.existingId}`
+        `${request.originalUrl}/${result.internalErrorDetails?.existingId}`
       );
       return response.status(StatusCodes.SEE_OTHER).send();
     }
@@ -128,27 +128,7 @@ export function createPostResponse<T extends ResultWithOptionalId>(
   response.setHeader(
     "Location",
     customLocationHeader ||
-      `${request.originalUrl}/${(result as ResultWithId).id}`
+    `${request.originalUrl}/${(result as ResultWithId).id}`
   );
   return response.status(StatusCodes.CREATED).json(result);
-}
-
-export function createPatchResponse<T>(
-  response: Response,
-  result: T | ErrorResult
-): Response<ErrorResponse> | Response<void> {
-  if (isErrorResult(result)) {
-    return createErrorResponse(response, result);
-  }
-  return response.status(StatusCodes.NO_CONTENT).send();
-}
-
-export function createDeleteResponse<T>(
-  response: Response,
-  result: T | ErrorResult
-): Response<ErrorResponse> | Response<void> {
-  if (isErrorResult(result)) {
-    return createErrorResponse(response, result);
-  }
-  return response.status(StatusCodes.NO_CONTENT).send();
 }

@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { logDebug } from "../../utils/logging";
 import { ErrorCode, ErrorResult } from "../../utils/shared-types";
 import prisma from "../../integrations/prisma/prisma-client";
-import { calculateMarketValue, decimalToNumber } from "../../utils/calculators";
+import { decimalToNumber } from "../../utils/data-transformers";
 import { PortfolioGetResponse } from "./portfolio-api.types";
 const subService = "portfolio/service";
 
@@ -121,3 +121,6 @@ export const mapPortfolioResponse = (user: PortfolioUser) => {
         positions,
     };
 };
+
+const calculateMarketValue = (quantity: number, marketPrice: number) =>
+    quantity * marketPrice;
